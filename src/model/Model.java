@@ -1,10 +1,10 @@
 package model;
 
+import controller.Presenter;
+
 public interface Model 
 {
-	public void moveUp();
-	public void moveDown();
-	public void moveLeft();
-	public void moveRight();
-	public int[][] getDate();
+	public boolean doAction(int userCommand);
+	public int[][] getData();
+	public void addObserver(Presenter presenter);
 }
