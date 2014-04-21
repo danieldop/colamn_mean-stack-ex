@@ -1,7 +1,10 @@
 package view;
 
-public interface View
+import controller.Presenter;
+
+public interface View extends Runnable
 {
-	public void displayDate(int[][] data);
+	public void displayData(final int[][] data);
 	public int getUserCommand();
+	public void addObserver(Presenter presenter);
 }
