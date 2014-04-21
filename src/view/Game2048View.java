@@ -14,6 +14,11 @@ public class Game2048View extends Observable implements View, Runnable
 	private Display display;
 	private Shell shell;
 	
+	public Game2048View()
+	{
+		this.run();
+	}
+	
 	private void initComponents()
 	{
 		display = new Display();
