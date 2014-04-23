@@ -4,10 +4,10 @@ import java.util.Observable;
 import java.util.Observer;
 
 import consts.CommandsConsts;
-import model.MazeModel;
+import model.Model2048;
 import model.Model;
-import view.MazeView;
 import view.View;
+import view.View2048;
 
 public class Presenter implements Observer
 {
@@ -15,7 +15,7 @@ public class Presenter implements Observer
 	private View v;
 	public static void main(String[] args)
 	{
-		new Presenter(new MazeModel(),new MazeView());
+		new Presenter(new Model2048(),new View2048());
 	}
 	public Presenter(Model m,View v)
 	{

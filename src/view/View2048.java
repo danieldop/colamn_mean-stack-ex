@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Shell;
 import consts.CommandsConsts;
 import controller.Presenter;
 
-public class MazeView extends Observable implements View
+public class View2048 extends Observable implements View
 {
 	private Display display;
 	private Shell shell;
@@ -86,7 +86,7 @@ public class MazeView extends Observable implements View
 	
 	private void initBoard()
 	{
-		Board board = new BoardMaze(shell, SWT.BORDER);
+		Board board = new Board2048(shell, SWT.BORDER);
 		board.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true, 2,2));
 		this.board = board;
 		
