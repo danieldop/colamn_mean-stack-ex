@@ -21,7 +21,7 @@ public class Model2048 extends Observable implements Model {
 
 	private boolean moveRight() {
 		int x = maze[0].length-1;
-		int y = maze.length-1;
+//		int y = maze.length-1;
 		for (int i = 0; i < maze.length; i++) {
 			// for each row
 			for (int j = x; j >0; j--) {

@@ -1,7 +1,5 @@
 package view;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Composite;
 
 public class Board2048 extends Board {
