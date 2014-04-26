@@ -7,7 +7,7 @@ import controller.Presenter;
 
 public class Model2048 extends Observable implements Model {
 
-	private int[][] maze;
+	private int[][] game;
 
 	public Model2048() {
 
@@ -16,31 +16,71 @@ public class Model2048 extends Observable implements Model {
 	@Override
 	public int[][] getData() {
 
-		return maze;
+		return game;
 	}
 
 	private boolean moveRight() {
-		int x = maze[0].length-1;
-//		int y = maze.length-1;
-		for (int i = 0; i < maze.length; i++) {
-			// for each row
-			for (int j = x; j >0; j--) {
-				if(maze[i][j] == 0 && maze[i][j-1] != 0)
-				{
-					maze[i][j] = maze[i][j-1];
-					maze[i][j-1] = 0;
+		try {
+			int x = game.length - 1;
+			
+			for (int i = 0; i < game.length; i++) {
+				for (int j = x; j > 0; j--) {
+					if (game[i][j] >1 && game[i][j] == game[i][j - 1]) {
+						game[i][j] = 2 * game[i][j];
+						game[i][j - 1] = -1;
+					} else if (game[i][j] == 0 && game[i][j - 1] != 0) {
+						game[i][j] = game[i][j - 1];
+						game[i][j - 1] = 0;
+						j +=2;
+					}
 				}
-				if(maze[i][j] == maze[i][j-1])
-				{
-					maze[i][j] = 2*maze[i][j];
-					maze[i][j-1] = 0;
+				for (int j = 0; j + 1 < game.length; j++) {
+					if (game[i][j] < 2) {
+						game[i][j] = 0;
+						if (j > 0) {
+							game[i][j] = game[i][j - 1];
+							game[i][j - 1] = 0;
+						}
+					}
 				}
-				// for each column
 			}
+			return true;
+		} catch (Exception e) {
+			return false;
 		}
-		return false;
-	}
 
+	}
+	private boolean moveLeft() {
+		try {
+			
+			for (int i = 0; i < game.length; i++) {
+				for (int j = 0; j <game.length-1; j++) {
+					if (game[i][j] >1 && game[i][j] == game[i][j + 1]) {
+						game[i][j] = 2 * game[i][j];
+						game[i][j + 1] = -1;
+					} else if (game[i][j] == 0 && game[i][j + 1] != 0) {
+						game[i][j] = game[i][j + 1];
+						game[i][j + 1] = 0;
+						j -=2;
+					}
+				}
+				for (int j = 0; j + 1 < game.length; j++) {
+					if (game[i][j] < 2) {
+						game[i][j] = 0;
+						if (j > 0) {
+							game[i][j] = game[i][j + 1];
+							game[i][j + 1] = 0;
+						
+						}
+					}
+				}
+			}
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+
+	}
 	private boolean move(int iTo, int jTo) {
 
 		// for(int i=0;i<maze.length;i++)
@@ -78,13 +118,13 @@ public class Model2048 extends Observable implements Model {
 	public boolean doAction(int userCommand) {
 		switch (userCommand) {
 		case CommandsConsts.UP:
-//			return moveUp();// UP
+			// return moveUp();// UP
 		case CommandsConsts.DOWN:
-			return move(1, 0);// DOWN
+			//return moveDown();// DOWN
 		case CommandsConsts.LEFT:
-			return move(0, -1);// LEFT
+			return moveLeft();// LEFT
 		case CommandsConsts.RIGHT:
-			return moveRight();
+			return moveRight();// RIGHT
 		case CommandsConsts.UP_LEFT:
 			return move(-1, -1);// DIAGONAL_UP_LEFT
 		case CommandsConsts.UP_RIGHT:
@@ -102,8 +142,8 @@ public class Model2048 extends Observable implements Model {
 	}
 
 	private void initiateMaze() {
-		this.maze = new int[][] { { 0, 0, 2, 2 }, { 0, 2, 0, 2 },
-				{ 0, 0, 0, 0 }, { 2, 4, 4, 0 } };
+		this.game = new int[][] { { 2, 2, 0, 4 }, { 4, 0, 0, 4 },
+				{8, 8, 8, 8 }, { 4, 4, 4, 2 } };
 	}
 
 }
