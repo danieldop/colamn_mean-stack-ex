@@ -24,8 +24,8 @@ public abstract class Board extends Canvas {
 			{
 				if(boardData!=null)
 				{
-					int x = ((getBounds().width-5)/boardData.length);
-					int y = ((getBounds().height-5)/boardData[0].length);
+					//int x = ((getBounds().width-5)/boardData.length);
+					//int y = ((getBounds().height-5)/boardData[0].length);
 					
 					int j;
 					gc.setForeground(new Color(getDisplay(),108,108,108));
@@ -33,7 +33,7 @@ public abstract class Board extends Canvas {
 					{
 						for(j=0;j<boardData[i].length;j++)
 						{
-							gc.drawRectangle(x*j,y*i,x,y);
+//							gc.drawRectangle(x*j,y*i,x,y);
 							setData(i, j);
 						}					
 					}
