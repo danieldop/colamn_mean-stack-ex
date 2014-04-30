@@ -11,6 +11,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import consts.CommandsConsts;
@@ -51,7 +52,28 @@ public class View2048 extends Observable implements View {
 
 		b2.setText("New Game");
 		b2.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		b2.addSelectionListener(new SelectionListener() {
 
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+
+			}
+
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+
+				 MessageBox messageBox = new MessageBox(shell, SWT.ICON_QUESTION
+				            | SWT.YES | SWT.NO);
+				        messageBox.setMessage("Do you really want to start a new game?");
+				        messageBox.setText("Start a new game");
+				        int response = messageBox.open();
+				        if (response == SWT.YES)
+				        	setUserCommand(CommandsConsts.INITIATE);
+				        refresh();
+				      }
+			
+
+		});
 		initBoard();
 
 		setKeyEvents();

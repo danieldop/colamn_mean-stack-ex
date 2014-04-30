@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Random;
 
+
+
+
 //import static java.lang.System.out;
 import consts.CommandsConsts;
 import controller.Presenter;
@@ -24,7 +27,7 @@ public class Model2048 extends Observable implements Model {
 
 	private boolean makeStep(boolean isCheckOnly) {
 		boolean res = false;
-
+		
 		for (int i = 0; i < game.length; i++) {
 			for (int j = game.length - 1; j > 0; j--) {
 				if (game[i][j] > 1 && game[i][j] == game[i][j - 1]) {
@@ -68,13 +71,14 @@ public class Model2048 extends Observable implements Model {
 
 	private boolean moveRight(boolean isCheckOnly) {
 		undoList.add(game);
+		rotateMatrix(4);
 		boolean res = makeStep(isCheckOnly);
 
 		if (isCheckOnly) {
 			return res;
 		} else {
 			if (res) {
-				//undoList.add(game);
+//				undoList.add(game);
 			}
 		}
 
@@ -102,7 +106,7 @@ public class Model2048 extends Observable implements Model {
 
 	private boolean moveUp(boolean isCheckOnly) {
 		undoList.add(game);
-		rotateMatrix(1);
+		rotateMatrix(0);
 		boolean res = makeStep(isCheckOnly);
 		rotateMatrix(3);
 		if (isCheckOnly) {
@@ -125,7 +129,7 @@ public class Model2048 extends Observable implements Model {
 			return res;
 		} else {
 			if (res) {
-			//	undoList.add(game);
+//				undoList.add(game);
 			}
 		}
 
@@ -212,9 +216,15 @@ public class Model2048 extends Observable implements Model {
 		}
 	}
 
+	
+
 	private void UndoStep() {
-		this.game = this.undoList.get(this.undoList.size() - 1);
-		this.undoList.remove(this.undoList.size() - 1);
+		System.out.println("undo " + this.undoList.size());
+		int[][] temp = this.undoList.get(this.undoList.size() - 1);
+		this.undoList.remove(temp);
+		this.game = temp;
+//		this.game = this.undoList.get(this.undoList.size() - 1);
+//		this.undoList.remove(this.undoList.size());
 	}
 
 	private void initiateMaze(int size) {
@@ -223,6 +233,7 @@ public class Model2048 extends Observable implements Model {
 		this.undoList = new ArrayList<int[][]>();
 		addRandomTile();
 		addRandomTile();
+		
 	}
 
 }
