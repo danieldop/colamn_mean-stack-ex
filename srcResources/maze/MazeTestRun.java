@@ -8,7 +8,7 @@ import model.algorithms.State;
 import model.algorithms.a_star.Astar;
 import model.algorithms.bfs.BFS;
 
-public class MazeRun 
+public class MazeTestRun 
 {
 	public static void main(String[] args)
 	{

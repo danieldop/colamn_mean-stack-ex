@@ -1,68 +1,21 @@
 package view.objects;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSource;
-import org.eclipse.swt.dnd.DragSourceEvent;
-import org.eclipse.swt.dnd.DragSourceListener;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 public class BoardMaze extends Board 
 {
-	Label mouse = new Label( this, SWT.BORDER );
 	
-	final static ImageData MOUSE = new ImageData("resources/images/MOUSE.png");
-	final static ImageData WALL = new ImageData("resources/images/WALL.jpg");
-	final static ImageData CHEESE =  new ImageData("resources/images/CHEESE.png");
-	final static ImageData CHEESE_MOUSE =  new ImageData("resources/images/MOUSE&CHEESE.png");
+	final static ImageData MOUSE = new ImageData(Board.class.getClass().getResourceAsStream("/images/MOUSE.png"));;
+	final static ImageData WALL = new ImageData(Board.class.getClass().getResourceAsStream("/images/WALL.jpg"));
+	final ImageData CHEESE =  new ImageData(Board.class.getClass().getResourceAsStream("/images/CHEESE.png"));
+	final ImageData CHEESE_MOUSE =  new ImageData(Board.class.getClass().getResourceAsStream("/images/MOUSE&CHEESE.png"));
 	
 	public BoardMaze(Composite parent, int style) 
 	{
 		super(parent, style);
-		setMouseDrag();
-	}
-	
-	private void setMouseDrag() 
-	{
-		DragSource dt = new DragSource(mouse,DND.DROP_MOVE | DND.DROP_COPY);
-		dt.setTransfer(new Transfer[]{TextTransfer.getInstance()});
-		dt.addDragListener(new DragSourceListener() {
-			
-			@Override
-			public void dragStart(DragSourceEvent e)
-			{
-			}
-			
-			@Override
-			public void dragSetData(DragSourceEvent e) 
-			{
-				e.data = "MOVE IT MOUSE!";
-			}
-			
-			@Override
-			public void dragFinished(DragSourceEvent arg0) 
-			{
-				
-			}
-		});
-	}
-
-	private void setMouseLabel(int i,int j,int x,int y)
-	{
-		if(mouse.getImage()!=null)
-			mouse.getImage().dispose();
-		
-		mouse.setVisible(true);
-		Image myImage = new Image( getDisplay(), MOUSE.scaledTo(x, y));
-		mouse.setImage(myImage);
-		mouse.setBounds(j*x,i*y,x,y);
-		mouse.setBackground(new Color(getDisplay(),225,150,186));
 	}
 
 	//HERE
@@ -86,20 +39,16 @@ public class BoardMaze extends Board
 			imgData = WALL;
 			break;
 		case 1:
-			setMouseLabel(i,j,x,y);
-			return;
+			imgData = MOUSE;
+			//IMPORTANT! this is used for the parent(View) to extract the location of the mouse when needed.
+			setData("mousePoint",new Point(j*x,i*y));
+			break;
 		case 2:
 			imgData = CHEESE;
-		break;
+			break;
 		case 3:
-			imgData = new ImageData("resources/images/MOUSE&CHEESE.png");
-			mouse.setBackground(getBackground());
-			if(mouse.getImage()!=null) 
-			{
-				mouse.getImage().dispose();mouse.setImage(null);
-				mouse.setVisible(false);
-			}
-		break;
+			imgData = CHEESE_MOUSE;
+			break;
 		}
 		if(imgData!=null)
 		{
