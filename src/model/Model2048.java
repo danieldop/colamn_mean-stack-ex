@@ -106,7 +106,7 @@ public class Model2048 extends Observable implements Model {
 
 	private boolean moveUp(boolean isCheckOnly) {
 		undoList.add(game);
-		rotateMatrix(0);
+		rotateMatrix(1);
 		boolean res = makeStep(isCheckOnly);
 		rotateMatrix(3);
 		if (isCheckOnly) {
