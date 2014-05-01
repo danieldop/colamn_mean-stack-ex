@@ -21,7 +21,6 @@ public class MazeModel extends Observable implements Model
 	private int score = 0;
 	private Stack<Integer> moveHistory;
 	private boolean isWin;
-	private int level;
 	public MazeModel()
 	{
 		this.moveHistory = new Stack<Integer>();
@@ -31,37 +30,44 @@ public class MazeModel extends Observable implements Model
 
 	public MazeModel(int rows,int cols,int level)
 	{
-		this.level = level;//for now its hardcoded.
 		
-		generateMaze(rows, cols);
+		generateMaze(rows, cols,level);
 		this.moveHistory = new Stack<Integer>();
 		this.score = 0;
 		this.isWin = false;
 	}
-	
-	private void generateMaze(int rows,int cols) 
+	/**
+	 * 
+	 * @param rows
+	 * @param cols
+	 * @param level
+	 * Generating a random maze based on rows,cols and level.
+	 */
+	private void generateMaze(int rows,int cols,int level) 
 	{
 		
 		
 		this.initiatedMaze = new int[rows][cols];
 		this.maze = new int[rows][cols];
 		
-		int distance = level*2;
 		
-		if(distance>=rows)
-		{
-			distance = rows/2;
-		}
-		if(distance == 0 )
-			distance = 1;
 		
 		Random random = new Random();
-		int[] mouseCoords = new int[]{0,random.nextInt(cols)};
-		int[] cheeseCoords = new int[]{random.nextInt(distance)+distance-1,random.nextInt(cols)};
+		
+		int mouseRow = random.nextInt(rows) - level*level;
+		int cheeseRow = random.nextInt(rows) + level*level;
+		
+		if(mouseRow < 0)//mouse out of boundaries?
+			mouseRow = 0;
+		if(cheeseRow>rows-1)//cheese out of boundaries?
+			cheeseRow = rows-1;
+		
+		int[] mouseCoords = new int[]{mouseRow,random.nextInt(cols)};
+		int[] cheeseCoords = new int[]{cheeseRow,random.nextInt(cols)};
 		
 		if(mouseCoords[0] == cheeseCoords[0] && mouseCoords[1] == cheeseCoords[1])//handle the only 
 		{
-			if(cols == 1)//not suppost to allow it... but lets make is generic
+			if(cols == 1)//not suppose to allow it... but lets make it generic
 			{
 				if(rows==1)//silly..
 				{
@@ -78,13 +84,18 @@ public class MazeModel extends Observable implements Model
 		this.initiatedMaze[mouseCoords[0]][mouseCoords[1]] = 1;
 		this.initiatedMaze[cheeseCoords[0]][cheeseCoords[1]] = 2;
 		
-		createDefaultPath(rows,cols,cheeseCoords,mouseCoords);
+		createDefaultPath(rows,cols,cheeseCoords,mouseCoords,level);
 		
 	}
-
-	private void initWalls()
+	
+	/**
+	 * 
+	 * @param level
+	 * generating maze walla based on level specified.
+	 */
+	private void initWalls(int level)
 	{
-		int maxNum = level*5 + 20,maxWalls = maxNum*(initiatedMaze.length)*(initiatedMaze[0].length)/100;
+		int maxNum = level*5 + 25,maxWalls = maxNum*(initiatedMaze.length)*(initiatedMaze[0].length)/100;
 		int wallsCount = 0,j,num;
 		Random rand = new Random();
 		for(int i=0;i<this.initiatedMaze.length;i++)
@@ -107,10 +118,20 @@ public class MazeModel extends Observable implements Model
 				break;
 		}
 	}
-
-	private void createDefaultPath(final int rows,final int cols,int[] cheeseCoords,int[] mouseCoords) 
+	/**
+	 * 
+	 * @param rows
+	 * @param cols
+	 * @param cheeseCoords
+	 * @param mouseCoords
+	 * @param level
+	 * 
+	 * Based on the mouse and cheese location, finding a default path from mouse to the cheese.
+	 * afterwards setting the path on the board (in case walls are covering the path.) 
+	 */
+	private void createDefaultPath(final int rows,final int cols,int[] cheeseCoords,int[] mouseCoords,int level) 
 	{
-		initWalls();//first put walls randomly
+		initWalls(level);//first put walls randomly
 		
 		
 		Maze maze= new Maze(rows,cols,new int[][]{},cheeseCoords,mouseCoords); 
@@ -147,6 +168,11 @@ public class MazeModel extends Observable implements Model
 		return maze;
 	}
 	
+	/**
+	 * 
+	 * @param m
+	 * takes the mazeModel specified and setting this mazeModel data accordingly
+	 */
 	private void load(MazeModel m)
 	{
 		this.maze = m.maze;
@@ -156,13 +182,31 @@ public class MazeModel extends Observable implements Model
 		this.isWin = m.isWin;
 	}
 	
-	private MazeModel copy()//THIS IS SO WE DONT SAVE THE OBS OBJECT CONTAINING THE OBSERVERS.
+	/**
+	 * 
+	 * @return new mazeModel instance, just like 'this' without the observers.
+	 * *(we don't want to save this object with the observers attached to it).
+	 */
+	private MazeModel saveWithoutObservers()
 	{
 		MazeModel m = new MazeModel();
 		m.load(this);
 		return m;
 	}
 	
+	/**
+	 * 
+	 * @param iTo
+	 * @param jTo
+	 * @param scoreTo
+	 * @param userCommand
+	 * @param isUndo
+	 * @return true if move is valid
+	 * 
+	 * makes a move(if valid)
+	 * records the move on the history moves.
+	 * if undo, each coordinate(iTo,jTo) will be multiplied by -1 to get the opposite direction effect.
+	 */
 	private boolean move(int iTo,int jTo,int scoreTo, int userCommand,boolean isUndo)
 	{
 		if(isUndo)
@@ -172,7 +216,7 @@ public class MazeModel extends Observable implements Model
 			scoreTo = scoreTo*-1;
 			
 			if(this.isWin)
-				return undoWinMove(iTo,jTo,scoreTo,userCommand);
+				return undoWinMove(iTo,jTo,scoreTo);
 		}
 		for(int i=0;i<maze.length;i++)
 		{
@@ -208,8 +252,18 @@ public class MazeModel extends Observable implements Model
 		
 		return false;
 	}
-
-	private boolean undoWinMove(int iTo, int jTo, int scoreTo, int userCommand) 
+	
+	/**
+	 * 
+	 * @param iTo
+	 * @param jTo
+	 * @param scoreTo
+	 * @param userCommand
+	 * @return
+	 * when user wins the board will store the data as '3' where the cheese('2') used to be.
+	 * to undo we set the '3'=>'2', again, and according to iTo,jTo we set the mouse('1') again.
+	 */
+	private boolean undoWinMove(int iTo, int jTo, int scoreTo) 
 	{
 		for(int i=0;i<maze.length;i++)
 		{
@@ -245,7 +299,14 @@ public class MazeModel extends Observable implements Model
 		super.addObserver(presenter);
 	}
 
-	private boolean doMovement(int userCommand,boolean isUndo)//isUndo: 1/-1
+	/**
+	 * 
+	 * @param userCommand
+	 * @param isUndo
+	 * @return
+	 * calling the "move" method with parameters according to userCommand,isUndo params.
+	 */
+	private boolean doMovement(int userCommand,boolean isUndo)
 	{
 		switch(userCommand)
 		{
@@ -323,7 +384,7 @@ public class MazeModel extends Observable implements Model
 			{
 				try 
 				{
-					FileHandler.saveObject(this.copy(),dataHelper.toString());//dataHelper should be the path
+					FileHandler.saveObject(saveWithoutObservers(),dataHelper.toString());//dataHelper should be the path
 				} catch (Exception e) 
 				{
 					return false;
@@ -338,7 +399,11 @@ public class MazeModel extends Observable implements Model
 		}
 		return false;//NO LEGAL TECHNICAL COMMAND.
 	}
-
+/**
+ * this.maze will now be exactly as this.initiatedMaze;
+ * the score will be restarted,the moveHistory too,
+ * and the isWin parameter will be set to false.
+ */
 	public void restartMaze() 
 	{
 		this.maze = new int[this.initiatedMaze.length][this.initiatedMaze[0].length];
@@ -355,6 +420,13 @@ public class MazeModel extends Observable implements Model
 		this.isWin = false;
 	}
 
+	/**
+	 * 
+	 * @param dataHelper
+	 * dataHelper is suppost to be an Integer[] object.
+	 * it must containg 2 positive numbers, these numbers
+	 * will be rows and columns for the 'maze' object.
+	 */
 	public void setPreviewMaze(Object dataHelper) 
 	{
 		Integer[] rowsCols = (Integer[]) dataHelper;//[0] = rows,[1]  = columns

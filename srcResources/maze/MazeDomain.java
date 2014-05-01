@@ -67,13 +67,11 @@ public class MazeDomain extends AbsDomain<int[],Maze>
 
 	@Override
 	public State<int[]> getStartState() {
-		// TODO Auto-generated method stub
 		return this.problem.getStartState();
 	}
 
 	@Override
 	public State<int[]> getGoalState() {
-		// TODO Auto-generated method stub
 		return this.problem.getGoalState();
 	}
 }

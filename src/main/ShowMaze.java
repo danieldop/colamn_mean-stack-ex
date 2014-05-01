@@ -8,6 +8,7 @@ public class ShowMaze
 {
 	public static void main(String[] args)
 	{
+		//present the preview of the maze.
 		Presenter.present(new MazeModel(),new MazePreView());
 	}
 }

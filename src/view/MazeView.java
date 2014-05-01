@@ -1,6 +1,5 @@
 package view;
 
-import java.util.Date;
 import java.util.Observable;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -8,18 +7,17 @@ import java.util.TimerTask;
 import model.MazeModel;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DropTarget;
-import org.eclipse.swt.dnd.DropTargetAdapter;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -28,28 +26,42 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import view.objects.Board;
 import view.objects.BoardMaze;
 import consts.CommandsConsts;
+import consts.GeneralConsts;
 import controller.Presenter;
 
 public class MazeView extends Observable implements View
 {
 	private Display display;
 	private Shell shell;
-	private Board board;
+	private Board board;//extends Canvas widget.
 	private Label score;
-	private int userCommand = -1;
 	
-	private Date nextRun;
-	private boolean isUp,isLeft,isDown,isRight;
+	private int userCommand = -1;//command for the Presenter.
 	
 	
+	private boolean isUp,isLeft,isDown,isRight;//isUp=>is arrow up key is down., etc...
+	
+	boolean isMouseDown = false;//for board mouse event if user clicked on the mouse.
+	
+	/**
+	 * @author omerpr <br>
+	 * initiates display,shell<br>
+	 * initiates score,board<br>
+	 * initiates buttons<br>
+	 * initiates menu bar.<br>
+	 * opens shell when done.
+	 */
 	private void initComponents()
 	{
+		
 		display = new Display();
+		
 		shell = new Shell(display);
 		
 		shell.setLayout(new GridLayout(2, false));
@@ -57,6 +69,18 @@ public class MazeView extends Observable implements View
 		shell.setMinimumSize(500,500);
 		shell.setLocation(display.getClientArea().width/2-250,display.getClientArea().height/2-250);
 		shell.setText("Maze");
+		
+		Image icon = null;
+		try
+		{
+			icon = new Image(display,new ImageData(getClass().getResourceAsStream("/images/MAZE.jpg")));
+			shell.setImage(icon);
+		}
+		finally
+		{
+			if(icon!= null)
+				icon.dispose();
+		}
 		
 		initScore();
 		
@@ -67,8 +91,15 @@ public class MazeView extends Observable implements View
 		initMenuBar();
 		
 		shell.open();
+		
 	}
-	
+	/**
+	 * @author omerpr<br>
+	 * menubar structure=> File,Edit<br>
+	 * menubar features:<br>
+	 * File:{Save Game,Load Game,Exit}<br>
+	 * Edit:{Restart,Reset settings,Undo}
+	 */
 	private void initMenuBar() 
 	{
 		Menu menuBar = new Menu(shell, SWT.BAR);
@@ -115,7 +146,8 @@ public class MazeView extends Observable implements View
 			@Override
 			public void widgetSelected(SelectionEvent arg0) 
 			{
-				shell.dispose();
+				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_EXIT,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
+					shell.dispose();
 			}
 			
 			@Override
@@ -135,7 +167,10 @@ public class MazeView extends Observable implements View
 			
 			@Override
 			public void widgetSelected(SelectionEvent arg0) 
-			{execCommand(CommandsConsts.VIEW_TEC_INITIATE_BOARD,true);}
+			{
+				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_RESTART,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
+					execCommand(CommandsConsts.VIEW_TEC_INITIATE_BOARD,false);
+			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {}
@@ -148,8 +183,11 @@ public class MazeView extends Observable implements View
 			@Override
 			public void widgetSelected(SelectionEvent arg0) 
 			{				
-				Presenter.present(new MazeModel(),new MazePreView());
-				shell.dispose();
+				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_RESET_SETTINGS,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
+				{
+					Presenter.present(new MazeModel(),new MazePreView());
+					shell.dispose();
+				}
 			}
 			
 			@Override
@@ -188,8 +226,10 @@ public class MazeView extends Observable implements View
 			@Override
 			public void mouseUp(MouseEvent arg0) 
 			{
-				//ARE YOU SURE POP UP.
-				execCommand(CommandsConsts.VIEW_TEC_INITIATE_BOARD,true);
+				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_RESTART,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
+					execCommand(CommandsConsts.VIEW_TEC_INITIATE_BOARD,true);
+				else
+					board.setFocus();//retrieve board focus.
 			}
 			
 			@Override
@@ -225,9 +265,13 @@ public class MazeView extends Observable implements View
 			@Override
 			public void mouseUp(MouseEvent arg0) 
 			{
-				//ARE YOU SURE POP UP.
-				Presenter.present(new MazeModel(),new MazePreView());
-				shell.dispose();
+				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_RESET_SETTINGS,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
+				{
+					Presenter.present(new MazeModel(),new MazePreView());
+					shell.dispose();
+				}
+				else
+					board.setFocus();
 			}
 
 
@@ -283,7 +327,13 @@ public class MazeView extends Observable implements View
 		btn.addMouseListener(new MouseListener() {
 			
 			@Override
-			public void mouseUp(MouseEvent arg0) {shell.dispose();}
+			public void mouseUp(MouseEvent arg0) 
+			{
+				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_EXIT,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
+					shell.dispose();
+				else
+					board.setFocus();
+			}
 
 
 			@Override
@@ -316,6 +366,12 @@ public class MazeView extends Observable implements View
 		display.dispose();
 	}
 
+	/**
+	 * @author omerpr
+	 * @param int[] data =>maze to display on the canvas.
+	 * calls the redraw of the canvas(on a synch Execution call) 
+	 *
+	 */
 	@Override
 	public void displayData(final int[][] data) 
 	{
@@ -340,6 +396,13 @@ public class MazeView extends Observable implements View
 		this.userCommand = userCommand;
 	}
 	
+	/**
+	 * @author omerpr
+	 * @
+	 * init the canvas board.
+	 * @
+	 * init the canvas board events.
+	 */
 	private void initBoard()
 	{
 		Board board = new BoardMaze(shell, SWT.BORDER);
@@ -347,17 +410,129 @@ public class MazeView extends Observable implements View
 		this.board = board;
 		
 		setBoardKeyEvents();
-		setBoardDrop();
+		setBoardMoveEvents();
 		
 		this.execCommand(CommandsConsts.VIEW_TEC_INITIATE_BOARD,true);
 	}
 	
+	/**
+	 * @author omerpr
+	 * @ 
+	 * enables mouse being dragged on the board.
+	 * @ 
+	 * 
+	 * NOTICE: board.getData("mousePoint") takes the mouse coordinates on the board from the board Object.
+	 * This structure is used inorder to keep the modularisation intact.
+	 */
+	private void setBoardMoveEvents() 
+	{
+		board.addMouseListener(new MouseListener() {
+			Point mouse;
+			int squareWidth,squareHeight;
+			Cursor hand = new Cursor(display, SWT.CURSOR_SIZEALL);
+			Cursor defaultCursor = new Cursor(display,SWT.CURSOR_ARROW);
+			@Override
+			public void mouseUp(MouseEvent arg0) 
+			{
+				isMouseDown = false;
+				board.setCursor(defaultCursor);
+			}
+			
+			@Override
+			public void mouseDown(MouseEvent e) 
+			{
+				mouse = (Point)board.getData("mousePoint");//extracting the mouse current location.
+				
+				squareWidth = (board.getBounds().width-5)/board.getBoardData()[0].length;
+				squareHeight = (board.getBounds().height-5)/board.getBoardData().length;
+				if(mouse!=null)
+				{
+					if(e.x>=mouse.x && e.x<mouse.x+squareWidth && e.y>=mouse.y && e.y<mouse.y+squareHeight)
+					{
+						isMouseDown = true;
+						board.setCursor(hand);
+					}
+				}
+				
+			}
+			
+			@Override
+			public void mouseDoubleClick(MouseEvent arg0) {}
+		});
+		board.addMouseMoveListener(new MouseMoveListener() 
+		{
+			Point mouse;
+			int squareWidth,squareHeight;//xSquares=>how many squares from mouse x,ySquares=>how many squares from mouse y.
+			int mouseX,mouseY;
+			
+			/**
+			 * 
+			 * @param double num1
+			 * @param double num2
+			 * detects the closest move the user is trying to move to and preforms the movement action.
+			 */
+			private void preformClosestMove(double x,double y)
+			{
+				if(x>1.6 || x<-1.6 || y>1.6 || y<-1.6)
+					return;//not relevant.
+				
+				if(x<-0.5 && y<-0.5)
+					execCommand(CommandsConsts.VIEW_MOVE_UP_LEFT, false);
+				else if(x>0.5 && y<-0.5)
+					execCommand(CommandsConsts.VIEW_MOVE_UP_RIGHT, false);
+				else if(x<-0.5 && y>0.5)
+					execCommand(CommandsConsts.VIEW_MOVE_DOWN_LEFT, false);
+				else if(x>0.5 && y>0.5)
+					execCommand(CommandsConsts.VIEW_MOVE_DOWN_RIGHT, false);
+				else if(x<-0.85 && y>-0.2)
+					execCommand(CommandsConsts.VIEW_MOVE_LEFT, false);
+				else if(x>0.85 && y<0.2)
+					execCommand(CommandsConsts.VIEW_MOVE_RIGHT, false);
+				else if(y<-0.85 && x>-0.2)
+					execCommand(CommandsConsts.VIEW_MOVE_UP, false);
+				else if(y>0.85 && x<0.2)
+					execCommand(CommandsConsts.VIEW_MOVE_DOWN, false);
+			}
+			
+			@Override
+			public void mouseMove(MouseEvent e) 
+			{
+				if(isMouseDown)
+				{
+					mouse = (Point)board.getData("mousePoint");
+					if(mouse != null)
+					{
+						
+						squareWidth = (board.getBounds().width-5)/board.getBoardData()[0].length;
+						squareHeight = (board.getBounds().height-5)/board.getBoardData().length;
+						
+						mouseX=mouse.x+squareWidth/2;
+						mouseY=mouse.y+squareHeight/2;
+		
+						preformClosestMove(((double)e.x-mouseX)/(squareWidth),((double)e.y-mouseY)/(squareHeight));
+					}
+					
+				}
+			}
+		});
+	}
+/**
+ * @author omerpr
+ * @param command
+ * @param focusBoard
+ * focusBoard is used when calling execCommand from a thread different from view thread.
+ */
 	private void execCommand(int command,boolean focusBoard) 
 	{
 		execCommand(command,null,focusBoard);
 
 	}
-	
+	/**
+	 * @author omerpr
+	 * @param command
+	 * @param focusBoard
+	 * focusBoard is used when calling execCommand from a thread different from view thread.
+	 */
 	private void execCommand(int command,Object data,boolean focusBoard) 
 	{
 		this.setUserCommand(command);
@@ -367,6 +542,18 @@ public class MazeView extends Observable implements View
 			this.board.setFocus();
 	}
 
+	/**
+	 * setting up all key movement responds.
+	 * @
+	 * ARROW_UP => UP
+	 * @
+	 * ARROW_DOWN => DOWN
+	 * @
+	 * ETC
+	 * .
+	 * .
+	 */
+	
 	private void setBoardKeyEvents()
 	{
 		this.board.addKeyListener(new KeyListener() 
@@ -412,17 +599,17 @@ public class MazeView extends Observable implements View
 						if((e.stateMask & SWT.CTRL) != 0)//ctrl is down.
 							execCommand(CommandsConsts.VIEW_MOVE_UNDO,false);
 					}
-					if(timer==null)
+					if(timer==null)//a movement has not been started yet.
 					{
 						counter = 0;
 						timer = new Timer();
-						timer.schedule(getMovementTask(),40);
+						timer.schedule(getMovementTask(),30);//give 30 milliseconds to include diagonal move.
 					}
-					else
+					else//a movement is already scheduled.
 					{
 						if(counter>8)
 							counter = 0;
-						timer.schedule(getMovementTask(),70+(++counter)*4 + (++counter)*8  + (++counter)*16);
+						timer.schedule(getMovementTask(),100+ (++counter)*70);//schedule the next move to occur later.
 					}
 				}
 			});
@@ -448,101 +635,6 @@ public class MazeView extends Observable implements View
 		});
 	}
 	
-	private void setBoardDrop()
-	{
-		DropTarget dt = new DropTarget(this.board, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK);
-		dt.setTransfer(new Transfer[]{TextTransfer.getInstance()});
-		dt.addDropListener(new DropTargetAdapter() {
-			
-			
-			int startX = 0;
-			int endX = 0;
-			int startY = 0;
-			int endY = 0;
-			@Override
-			public void dragLeave(DropTargetEvent e) 
-			{
-			}
-			
-			@Override
-			public void dropAccept(DropTargetEvent arg0) {}
-			
-			@Override
-			public void drop(DropTargetEvent e) 
-			{
-				int colLen = board.getBoardData().length;
-				int rowLen = board.getBoardData()[0].length;
-				int squareWidth = (board.getBounds().width-5)/rowLen;
-				int squareHeight = (board.getBounds().height-5)/colLen;
-				//DO NOTHING. JUST FOR THE EFFECTS.
-				int xSquares =3*(endX - startX)/(2*squareWidth);
-				int ySquares =3*(endY - startY)/(2*squareHeight);
-				switch(xSquares)
-				{
-					case 0:
-						switch(ySquares)
-						{
-							case -1:
-								execCommand(CommandsConsts.VIEW_MOVE_UP,true);
-								break;
-							case 1:
-								execCommand(CommandsConsts.VIEW_MOVE_DOWN,true);
-								break;
-						}
-						break;
-					case 1:
-						switch(ySquares)
-						{
-							case 0:
-								execCommand(CommandsConsts.VIEW_MOVE_RIGHT,true);
-								break;
-							case 1:
-								execCommand(CommandsConsts.VIEW_MOVE_DOWN_RIGHT,true);
-								break;
-							case -1:
-								execCommand(CommandsConsts.VIEW_MOVE_UP_RIGHT,true);
-								break;
-						}
-						break;
-					case -1:
-						switch(ySquares)
-						{
-							case 0:
-								execCommand(CommandsConsts.VIEW_MOVE_LEFT,true);
-								break;
-							case 1:
-								execCommand(CommandsConsts.VIEW_MOVE_DOWN_LEFT,true);
-								break;
-							case -1:
-								execCommand(CommandsConsts.VIEW_MOVE_UP_LEFT,true);
-								break;
-						}
-						break;
-				}
-					
-			}
-			
-			@Override
-			public void dragOver(DropTargetEvent e) 
-			{
-				endX = e.x;
-				endY = e.y;
-			}
-			
-			@Override
-			public void dragOperationChanged(DropTargetEvent arg0) {}
-			
-
-			
-			@Override
-			public void dragEnter(DropTargetEvent e) 
-			{
-				
-				startX = e.x;
-				startY = e.y;
-			}
-		});
-	}
 	private void saveOrLoadGame(int dialogType)
 	{
 		 FileDialog dialog = new FileDialog(shell, dialogType);
@@ -559,6 +651,8 @@ public class MazeView extends Observable implements View
 		 }
 		 execCommand(userCommand,path,true);
 	}
+	
+	
 	private TimerTask getMovementTask()
 	{
 		 return new TimerTask() 
@@ -593,5 +687,12 @@ public class MazeView extends Observable implements View
 						execCommand(CommandsConsts.VIEW_MOVE_LEFT,false);
 				}
 			};
+	}
+	
+	private int openMessageBox(String text,int style)
+	{
+		MessageBox mb = new MessageBox(shell,style);
+		mb.setMessage(text);
+		return mb.open();
 	}
 }

@@ -26,16 +26,17 @@ public class Maze extends Problem<int[]>
 	private final int CHEESE = 2;
 	private final int MOUSE = 1;
 	private int[][] maze;
+
+	public Maze()
+	{
+		super(null,null);
+	}
 	/**
 	 * init the maze according to rows and columns.
 	 * setting the walls.
 	 * setting the cheese.
 	 * setting the mouse.
 	 */
-	public Maze()
-	{
-		super(null,null);
-	}
 	public Maze(int rows,int columns,int[][] walls,int[] cheese,int[] mouse)
 	{
 		super(new State<int[]>(Maze.toStateStr(mouse),new int[]{mouse[0],mouse[1]}),new State<int[]>(Maze.toStateStr(cheese),new int[]{cheese[0],cheese[1]}));
