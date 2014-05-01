@@ -9,6 +9,15 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
 public class FileHandler {
+	/**
+	 * 
+	 * @param o
+	 * @param path
+	 * @throws IOException
+	 * 
+	 * Saves the object as xml file.(using xStream)
+	 * all objects and sub-objects this object may hold, must have default constructors for them to be loaded from the file.
+	 */
 	public static void saveObject(Object o,String path) throws IOException
 	{
 		FileWriter f = new FileWriter(new File(path));
@@ -22,6 +31,15 @@ public class FileHandler {
 			f.close();
 		}
 	}
+	/**
+	 * 
+	 * @param path
+	 * @return
+	 * @throws IOException
+	 * 
+	 * Load an xml file.
+	 * all objects and sub-objects this object may hold, must have default constructors for them to be loaded from the file.
+	 */
 	public static Object loadObject(String path) throws IOException
 	{
 		FileReader f = new FileReader(new File(path));

@@ -1,8 +1,6 @@
-package view;
+package boards.maze.view;
 
 import java.util.Observable;
-
-import model.MazeModel;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -10,6 +8,8 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -19,8 +19,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import boards.maze.model.MazeModel;
+import boards.maze.view.objects.BoardMaze;
+import view.View;
 import view.objects.Board;
-import view.objects.BoardMaze;
 import consts.CommandsConsts;
 import consts.GeneralConsts;
 import controller.Presenter;
@@ -49,7 +51,19 @@ public class MazePreView extends Observable implements View
 		}
 		display.dispose();
 	}
-	
+	/**
+	 * @author omerpr
+	 * @
+	 * initiates display,shell
+	 * @
+	 * initiates score,board
+	 * @
+	 * initiates left(data) section.
+	 * @
+	 * initiates the continue button.
+	 * @
+	 * opens shell when done.
+	 */
 	private void initComponents()
 	{
 		display = new Display();
@@ -60,6 +74,18 @@ public class MazePreView extends Observable implements View
 		shell.setLocation(display.getClientArea().width/2-250,display.getClientArea().height/2-250);
 		shell.setMinimumSize(500,500);
 		shell.setText("Set Maze Settings");
+		
+		Image icon = null;
+		try
+		{
+			icon = new Image(display,new ImageData(getClass().getResourceAsStream("/images/MAZE.jpg")));
+			shell.setImage(icon);
+		}
+		finally
+		{
+			if(icon!= null)
+				icon.dispose();
+		}
 		
 		initDataSection();
 		initBoard();
@@ -101,6 +127,9 @@ public class MazePreView extends Observable implements View
 				}
 				rowsNum = Integer.valueOf(rows.getText());
 				colsNum = Integer.valueOf(cols.getText());
+				
+				if(rowsNum*colsNum == 0)
+					return;
 				
 				if(rowsNum>GeneralConsts.VIEW_MAZE_MAX_ROWS_COLS)
 				{
@@ -152,11 +181,7 @@ public class MazePreView extends Observable implements View
 	{
 		this.userCommand = userCommand;
 	}
-	/*private void execCommand(int command) 
-	{
-		execCommand(command,null);
-	}*/
-	
+
 	private void execCommand(int command,Object data) 
 	{
 		this.setUserCommand(command);
@@ -190,41 +215,46 @@ public class MazePreView extends Observable implements View
 		
 		try
 		{
-		rows = new Text(shell,SWT.BORDER);
-		gc = new GC(rows);
-		
-		GridData g = new GridData(SWT.FILL,SWT.TOP, false, false, 1,1);
-		g.widthHint = gc.getFontMetrics().getAverageCharWidth()*3;
-		
-		rows.setLayoutData(g);
-		rows.setTextLimit(2);
-		
-		Label x = new Label(shell,SWT.NONE);
-		x.setText("x");
-		x.setLayoutData(new GridData(SWT.FILL,SWT.TOP, false, false, 1,1));
-		
-		cols = new Text(shell,SWT.BORDER);
-		cols.setLayoutData(g);
-		cols.setTextLimit(2);
-		
-		rows.addKeyListener(this.getKeyListener());
-		cols.addKeyListener(this.getKeyListener());
-		
-		rows.setSelection(rows.getText().length());
-		
-		
-		Label level = new Label(shell,SWT.NONE);
-		level.setText("Level: ");
-		level.setLayoutData(new GridData(SWT.FILL,SWT.TOP, false, false, 1,1));
-		
-		levels = new Combo(shell, SWT.READ_ONLY);
-		levels.setLayoutData(new GridData(SWT.FILL,SWT.TOP, false, false, 2,1));
-		levels.add(GeneralConsts.VIEW_LEVEL_ONE);
-		levels.add(GeneralConsts.VIEW_LEVEL_TWO);
-		levels.add(GeneralConsts.VIEW_LEVEL_THREE);
-		levels.add(GeneralConsts.VIEW_LEVEL_FOUR);
-		levels.add(GeneralConsts.VIEW_LEVEL_FIVE);
-		levels.select(0);
+			/*
+			 * rows input & cols input.
+			 */
+			rows = new Text(shell,SWT.BORDER);
+			gc = new GC(rows);
+			
+			GridData g = new GridData(SWT.FILL,SWT.TOP, false, false, 1,1);
+			g.widthHint = gc.getFontMetrics().getAverageCharWidth()*3;
+			
+			rows.setLayoutData(g);
+			rows.setTextLimit(2);
+			
+			Label x = new Label(shell,SWT.NONE);
+			x.setText("x");
+			x.setLayoutData(new GridData(SWT.FILL,SWT.TOP, false, false, 1,1));
+			
+			cols = new Text(shell,SWT.BORDER);
+			cols.setLayoutData(g);
+			cols.setTextLimit(2);
+			
+			rows.addKeyListener(this.getDynamicBoardKeyListener());
+			cols.addKeyListener(this.getDynamicBoardKeyListener());
+			
+			rows.setSelection(rows.getText().length());
+			
+			/*
+			 * Levels label & combo box
+			 */
+			Label level = new Label(shell,SWT.NONE);
+			level.setText("Level: ");
+			level.setLayoutData(new GridData(SWT.FILL,SWT.TOP, false, false, 1,1));
+			
+			levels = new Combo(shell, SWT.READ_ONLY);
+			levels.setLayoutData(new GridData(SWT.FILL,SWT.TOP, false, false, 2,1));
+			levels.add(GeneralConsts.VIEW_LEVEL_ONE);
+			levels.add(GeneralConsts.VIEW_LEVEL_TWO);
+			levels.add(GeneralConsts.VIEW_LEVEL_THREE);
+			levels.add(GeneralConsts.VIEW_LEVEL_FOUR);
+			levels.add(GeneralConsts.VIEW_LEVEL_FIVE);
+			levels.select(0);
 		
 		}
 		finally
@@ -247,7 +277,13 @@ public class MazePreView extends Observable implements View
 		//DO NOTHING. GAME HASNT STARTED YET.
 	}
 	
-	private KeyListener getKeyListener()
+	/**
+	 * when both rows and cols are set with positive numbers,
+	 * the board will be build dynamically.
+	 * 
+	 * @return KeyListener
+	 */
+	private KeyListener getDynamicBoardKeyListener()
 	{
 		return new KeyListener() 
 		{

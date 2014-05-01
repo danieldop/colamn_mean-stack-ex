@@ -8,7 +8,7 @@ import model.algorithms.State;
 import model.algorithms.a_star.Astar;
 import model.algorithms.bfs.BFS;
 
-public class LettersRun {
+public class LettersTestRun {
 	public static void main(String[] args)
 	{
 		Letter letters=new Letter("JAVA","VAJA");//Takes time to run this when adding more chars..
