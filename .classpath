@@ -3,8 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="searchAlgorithmsResources"/>
 	<classpathentry kind="src" path="generalResources"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/omerpr/git/donno/generalResources/xstream-1.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/omerpr/git/donno/generalResources/org.eclipse.swt.win32.win32.x86_64_3.102.1.v20130827-2048.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="lib" path="C:/Users/Oded/git/unit_proj/generalResources/xstream-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Oded/git/unit_proj/generalResources/org.eclipse.swt.win32.win32.x86_64_3.102.1.v20130827-2048.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

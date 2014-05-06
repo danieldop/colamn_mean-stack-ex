@@ -1,14 +1,14 @@
-package view;
+package mvp.interfaces.view;
 
-import controller.Presenter;
+import mvp.controller.Presenter;
 
 public interface View extends Runnable
 {
 	/**
-	 * 
-	 * @param data
-	 * refreshes the board data.
-	 * if the data is held by a canvas, it should call redraw method.
+
+	 * @param int[][] data =>board to display on the canvas.
+	 * calls the redraw of the canvas(on a synch Execution call) 
+	 *
 	 */
 	public void displayData(final int[][] data);
 	public int getUserCommand();

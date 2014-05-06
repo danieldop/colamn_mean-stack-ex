@@ -6,13 +6,13 @@ import java.util.Stack;
 
 import maze.Maze;
 import maze.MazeDomain;
-import model.Model;
 import model.algorithms.Action;
 import model.algorithms.Distance;
 import model.algorithms.State;
 import model.algorithms.bfs.BFS;
-import consts.CommandsConsts;
-import controller.Presenter;
+import mvp.consts.CommandsConsts;
+import mvp.controller.Presenter;
+import mvp.interfaces.model.Model;
 import filesys.FileHandler;
 
 public class MazeModel extends Observable implements Model

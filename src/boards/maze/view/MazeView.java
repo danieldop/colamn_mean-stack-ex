@@ -1,8 +1,12 @@
 package boards.maze.view;
 
-import java.util.Observable;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import mvp.consts.CommandsConsts;
+import mvp.controller.Presenter;
+import mvp.interfaces.view.ViewAbs;
+import mvp.interfaces.view.objects.Board;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -10,391 +14,23 @@ import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import boards.maze.model.MazeModel;
 import boards.maze.view.objects.BoardMaze;
-import view.View;
-import view.objects.Board;
-import consts.CommandsConsts;
-import consts.GeneralConsts;
-import controller.Presenter;
 
-public class MazeView extends Observable implements View
+public class MazeView extends ViewAbs
 {
-	private Display display;
-	private Shell shell;
-	private Board board;//extends Canvas widget.
-	private Label score;
-	
-	private int userCommand = -1;//command for the Presenter.
-	
 	
 	private boolean isUp,isLeft,isDown,isRight;//isUp=>is arrow up key is down., etc...
 	
 	boolean isMouseDown = false;//for board mouse event if user clicked on the mouse.
-	
-	/**
-	 * @author omerpr <br>
-	 * initiates display,shell<br>
-	 * initiates score,board<br>
-	 * initiates buttons<br>
-	 * initiates menu bar.<br>
-	 * opens shell when done.
-	 */
-	private void initComponents()
-	{
-		
-		display = new Display();
-		
-		shell = new Shell(display);
-		
-		shell.setLayout(new GridLayout(2, false));
-		shell.setSize(500, 500);
-		shell.setMinimumSize(500,500);
-		shell.setLocation(display.getClientArea().width/2-250,display.getClientArea().height/2-250);
-		shell.setText("Maze");
-		
-		Image icon = null;
-		try
-		{
-			icon = new Image(display,new ImageData(getClass().getResourceAsStream("/images/MAZE.jpg")));
-			shell.setImage(icon);
-		}
-		finally
-		{
-			if(icon!= null)
-				icon.dispose();
-		}
-		
-		initScore();
-		
-		initBoard();	
-		
-		initButtons();
-		
-		initMenuBar();
-		
-		shell.open();
-		execCommand(CommandsConsts.VIEW_TEC_INITIATE_BOARD,true);
-	}
-	/**
-	 * @author omerpr<br>
-	 * menubar structure=> File,Edit<br>
-	 * menubar features:<br>
-	 * File:{Save Game,Load Game,Exit}<br>
-	 * Edit:{Restart,Reset settings,Undo}
-	 */
-	private void initMenuBar() 
-	{
-		Menu menuBar = new Menu(shell, SWT.BAR);
-		
-		
-		/*FILE MENU BAR SECTION - START*/
-		MenuItem fileMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-		fileMenuHeader.setText("&File");	
-		Menu fileMenu = new Menu(shell, SWT.DROP_DOWN);
-	    fileMenuHeader.setMenu(fileMenu);
-	    
-	    MenuItem fileSaveItem = new MenuItem(fileMenu, SWT.PUSH);
-	    fileSaveItem.setText("Save Game");
-	    fileSaveItem.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) 
-			{
-				saveOrLoadGame(SWT.SAVE);
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		});
-	    
-	    MenuItem fileLoadItem = new MenuItem(fileMenu, SWT.PUSH);
-	    fileLoadItem.setText("Load Game");
-	    fileLoadItem.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) 
-			{
-				saveOrLoadGame(SWT.OPEN);
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		});
-
-	    MenuItem fileExitItem = new MenuItem(fileMenu, SWT.PUSH);
-	    fileExitItem.setText("Exit");
-	    fileExitItem.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) 
-			{
-				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_EXIT,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
-					shell.dispose();
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		});
-	    /*FILE MENU BAR SECTION - END*/
-	    
-	    /*EDIT MENU BAR SECTION - START*/
-		MenuItem editMenuHeader = new MenuItem(menuBar, SWT.CASCADE);
-		editMenuHeader.setText("&Edit");	
-		Menu editMenu = new Menu(shell, SWT.DROP_DOWN);
-		editMenuHeader.setMenu(editMenu);
-	    
-		MenuItem editRestartItem = new MenuItem(editMenu, SWT.PUSH);
-		editRestartItem.setText("Restart Maze");
-		editRestartItem.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) 
-			{
-				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_RESTART,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
-					execCommand(CommandsConsts.VIEW_TEC_RESTART_BOARD,false);
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		});
-		
-	    MenuItem editResetItem = new MenuItem(editMenu, SWT.PUSH);
-	    editResetItem.setText("Reset Maze Settings");
-	    editResetItem.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) 
-			{				
-				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_RESET_SETTINGS,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
-				{
-					Presenter.present(new MazeModel(),new MazePreView());
-					shell.dispose();
-				}
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		});
-	    
-	    
-	    MenuItem editUndoItem = new MenuItem(editMenu, SWT.PUSH);
-	    editUndoItem.setText("Undo Move{Ctrl+z}");
-	    editUndoItem.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {execCommand(CommandsConsts.VIEW_MOVE_UNDO,true);}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		});
-	    
-	    /*EDIT MENU BAR SECTION - END*/
-	    
-	    shell.setMenuBar(menuBar);
-		
-		
-	}
-
-	private void initButtons() 
-	{
-		Button btn;
-		
-		btn=new Button(shell, SWT.PUSH);		
-		
-		btn.setText("Restart Game");
-		btn.setLayoutData(new GridData(SWT.FILL,SWT.FILL, false, false, 1,1));
-		btn.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseUp(MouseEvent arg0) 
-			{
-				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_RESTART,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
-					execCommand(CommandsConsts.VIEW_TEC_RESTART_BOARD,true);
-				else
-					board.setFocus();//retrieve board focus.
-			}
-			
-			@Override
-			public void mouseDown(MouseEvent arg0) {}
-
-			@Override
-			public void mouseDoubleClick(MouseEvent arg0) {}
-		});
-		
-		btn=new Button(shell, SWT.PUSH);
-		btn.setText("Undo Move");
-		btn.setLayoutData(new GridData(SWT.FILL,SWT.FILL, false, false, 1,1));
-		btn.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseUp(MouseEvent arg0) 
-			{
-				execCommand(CommandsConsts.VIEW_MOVE_UNDO,true);
-			}
-			
-			@Override
-			public void mouseDown(MouseEvent arg0) {}
-
-			@Override
-			public void mouseDoubleClick(MouseEvent arg0) {}
-		});
-		
-		btn=new Button(shell, SWT.PUSH);
-		btn.setText("Reset Maze Settings");
-		btn.setLayoutData(new GridData(SWT.FILL,SWT.FILL, false, false, 1,1));
-		btn.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseUp(MouseEvent arg0) 
-			{
-				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_RESET_SETTINGS,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
-				{
-					Presenter.present(new MazeModel(),new MazePreView());
-					shell.dispose();
-				}
-				else
-					board.setFocus();
-			}
 
 
-			@Override
-			public void mouseDown(MouseEvent arg0) {}
-
-			@Override
-			public void mouseDoubleClick(MouseEvent arg0) {}
-		});
-		
-		btn=new Button(shell, SWT.PUSH);
-		btn.setText("Save Game");
-		btn.setLayoutData(new GridData(SWT.FILL,SWT.FILL, false, false, 1,1));
-		btn.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseUp(MouseEvent arg0) 
-			{
-				saveOrLoadGame(SWT.SAVE);
-			}
-
-
-			@Override
-			public void mouseDown(MouseEvent arg0) {}
-
-			@Override
-			public void mouseDoubleClick(MouseEvent arg0) {}
-		});
-		
-		btn=new Button(shell, SWT.PUSH);
-		btn.setText("Load Game");
-		btn.setLayoutData(new GridData(SWT.FILL,SWT.FILL, false, false, 1,1));
-		btn.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseUp(MouseEvent arg0) 
-			{
-				saveOrLoadGame(SWT.OPEN);
-			}
-
-
-			@Override
-			public void mouseDown(MouseEvent arg0) {}
-
-			@Override
-			public void mouseDoubleClick(MouseEvent arg0) {}
-		});
-		
-		
-		btn=new Button(shell, SWT.PUSH);
-		btn.setText("Exit");
-		btn.setLayoutData(new GridData(SWT.FILL,SWT.FILL, false, false, 1,1));
-		btn.addMouseListener(new MouseListener() {
-			
-			@Override
-			public void mouseUp(MouseEvent arg0) 
-			{
-				if(openMessageBox(GeneralConsts.VIEW_MGS_ARE_YOU_SURE_EXIT,SWT.ICON_QUESTION | SWT.YES | SWT.NO) == SWT.YES)
-					shell.dispose();
-				else
-					board.setFocus();
-			}
-
-
-			@Override
-			public void mouseDown(MouseEvent arg0) {}
-
-			@Override
-			public void mouseDoubleClick(MouseEvent arg0) {}
-		});
-		
-	}
-
-	private void initScore() 
-	{
-		score = new Label(shell, SWT.BOLD);
-		score.setLayoutData(new GridData(SWT.FILL,SWT.TOP, false, false, 1,1));
-	}
-
-	@Override
-	public void run() 
-	{
-		initComponents();
-		
-		while(!shell.isDisposed())
-		{
-			if(!display.readAndDispatch())
-			{
-				display.sleep();
-			}
-		}
-		display.dispose();
-	}
-
-	/**
-	 * @author omerpr
-	 * @param int[] data =>maze to display on the canvas.
-	 * calls the redraw of the canvas(on a synch Execution call) 
-	 *
-	 */
-	@Override
-	public void displayData(final int[][] data) 
-	{
-		display.syncExec(new Runnable() {
-			
-			@Override
-			public void run() 
-			{
-				board.setBoardData(data);
-			}
-		});
-		
-	}
-
-	@Override
-	public int getUserCommand() 
-	{
-		return this.userCommand;
-	}
-	private void setUserCommand(int userCommand)
-	{
-		this.userCommand = userCommand;
-	}
 	
 	/**
 	 * @author omerpr
@@ -403,14 +39,12 @@ public class MazeView extends Observable implements View
 	 * @
 	 * init the canvas board events.
 	 */
-	private void initBoard()
+	protected Board initBoard()
 	{
 		Board board = new BoardMaze(shell, SWT.BORDER);
 		board.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true, 1,8));
-		this.board = board;
-		
-		setBoardKeyEvents();
-		setBoardMoveEvents();
+
+		return board;
 	}
 	
 	/**
@@ -422,7 +56,8 @@ public class MazeView extends Observable implements View
 	 * NOTICE: board.getData("mousePoint") takes the mouse coordinates on the board from the board Object.
 	 * This structure is used inorder to keep the modularisation intact.
 	 */
-	private void setBoardMoveEvents() 
+	@Override
+	protected void initBoardMouseEvents() 
 	{
 		board.addMouseListener(new MouseListener() {
 			Point mouse;
@@ -512,31 +147,6 @@ public class MazeView extends Observable implements View
 			}
 		});
 	}
-/**
- * @author omerpr
- * @param command
- * @param focusBoard
- * focusBoard is used when calling execCommand from a thread different from view thread.
- */
-	private void execCommand(int command,boolean focusBoard) 
-	{
-		execCommand(command,null,focusBoard);
-
-	}
-	/**
-	 * @author omerpr
-	 * @param command
-	 * @param focusBoard
-	 * focusBoard is used when calling execCommand from a thread different from view thread.
-	 */
-	private void execCommand(int command,Object data,boolean focusBoard) 
-	{
-		this.setUserCommand(command);
-		setChanged();
-		notifyObservers(data);
-		if(focusBoard)
-			this.board.setFocus();
-	}
 
 	/**
 	 * setting up all key movement responds.
@@ -549,8 +159,8 @@ public class MazeView extends Observable implements View
 	 * .
 	 * .
 	 */
-	
-	private void setBoardKeyEvents()
+	@Override
+	protected void initBoardKeyEvents()
 	{
 		this.board.addKeyListener(new KeyListener() 
 			{
@@ -610,44 +220,6 @@ public class MazeView extends Observable implements View
 				}
 			});
 	}
-
-	@Override
-	public void addObserver(Presenter presenter) 
-	{
-		super.addObserver(presenter);
-	}
-
-	@Override
-	public void displayScore(final String scoreStr) 
-	{
-		display.syncExec(new Runnable() {
-			
-			@Override
-			public void run() 
-			{
-				score.setText("Score: "+scoreStr);
-				score.setToolTipText(scoreStr);
-			}
-		});
-	}
-	
-	private void saveOrLoadGame(int dialogType)
-	{
-		 FileDialog dialog = new FileDialog(shell, dialogType);
-		 dialog.setFilterNames(new String[] {"Xml Files"});
-		 dialog.setFilterExtensions(new String[] {"*.xml"});
-		 String path = dialog.open();
-		 int userCommand = (dialogType == SWT.SAVE) 
-				 			?CommandsConsts.VIEW_TEC_SAVE_BOARD 
-				 			:CommandsConsts.VIEW_TEC_LOAD_BOARD;
-		 if(path==null)
-		 {
-			 board.setFocus();
-			 return;
-		 }
-		 execCommand(userCommand,path,true);
-	}
-	
 	
 	private TimerTask getMovementTask()
 	{
@@ -662,7 +234,7 @@ public class MazeView extends Observable implements View
 					if(isUp)
 					{
 						if(isLeft)
-							execCommand(CommandsConsts.VIEW_MOVE_UP_LEFT,true);
+							execCommand(CommandsConsts.VIEW_MOVE_UP_LEFT,false);
 						else if(isRight)
 							execCommand(CommandsConsts.VIEW_MOVE_UP_RIGHT,false);
 						else
@@ -684,11 +256,32 @@ public class MazeView extends Observable implements View
 				}
 			};
 	}
-	
-	private int openMessageBox(String text,int style)
+
+	@Override
+	protected Shell initShell() 
 	{
-		MessageBox mb = new MessageBox(shell,style);
-		mb.setMessage(text);
-		return mb.open();
+		
+		Shell shell = new Shell(display);
+		
+		shell.setLayout(new GridLayout(2, false));
+		shell.setSize(500, 500);
+		shell.setMinimumSize(500,500);
+		shell.setLocation(display.getClientArea().width/2-250,display.getClientArea().height/2-250);
+		shell.setText("Maze");
+		
+		return shell;
+	}
+
+	@Override
+	protected String getIconPath() {
+		// TODO Auto-generated method stub
+		return "/images/MAZE.jpg";
+	}
+
+	@Override
+	protected void resetGameSettings() 
+	{
+		new Presenter(new MazeModel(),new MazePreView());
+		shell.dispose();
 	}
 }

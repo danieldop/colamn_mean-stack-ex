@@ -1,6 +1,6 @@
-package model;
+package mvp.interfaces.model;
 
-import controller.Presenter;
+import mvp.controller.Presenter;
 
 public interface Model 
 {

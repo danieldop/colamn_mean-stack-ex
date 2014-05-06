@@ -1,11 +1,11 @@
-package controller;
+package mvp.controller;
 
 import java.util.Observable;
 import java.util.Observer;
 
-import consts.CommandsConsts;
-import model.Model;
-import view.View;
+import mvp.consts.CommandsConsts;
+import mvp.interfaces.model.Model;
+import mvp.interfaces.view.View;
 
 public class Presenter implements Observer
 {

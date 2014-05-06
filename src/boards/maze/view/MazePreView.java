@@ -2,6 +2,12 @@ package boards.maze.view;
 
 import java.util.Observable;
 
+import mvp.consts.CommandsConsts;
+import mvp.consts.GeneralConsts;
+import mvp.controller.Presenter;
+import mvp.interfaces.view.View;
+import mvp.interfaces.view.objects.Board;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -21,11 +27,6 @@ import org.eclipse.swt.widgets.Text;
 
 import boards.maze.model.MazeModel;
 import boards.maze.view.objects.BoardMaze;
-import view.View;
-import view.objects.Board;
-import consts.CommandsConsts;
-import consts.GeneralConsts;
-import controller.Presenter;
 
 public class MazePreView extends Observable implements View
 {

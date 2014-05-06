@@ -1,12 +1,12 @@
 package boards.maze.view.objects;
 
+import mvp.interfaces.view.objects.Board;
+
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
-
-import view.objects.Board;
 
 public class BoardMaze extends Board 
 {

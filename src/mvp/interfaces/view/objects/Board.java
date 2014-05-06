@@ -1,4 +1,4 @@
-package view.objects;
+package mvp.interfaces.view.objects;
 
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -19,6 +19,10 @@ public abstract class Board extends Canvas {
 			@Override
 			public void paintControl(PaintEvent e) 
 			{
+				int size = Math.min(getBounds().width, getBounds().height);
+				setBounds(getBounds().x,getBounds().y,size,size);
+				
+				
 				if(boardData!=null)
 				{	
 					gc = e.gc;
