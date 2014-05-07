@@ -16,8 +16,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import boards._2048.model.Model2048;
-import boards._2048.view.PreView2048;
+import boards._2048.model._2048Model;
+import boards._2048.view._2048PreView;
 import boards.maze.model.MazeModel;
 import boards.maze.view.MazePreView;
 
@@ -48,9 +48,9 @@ public class MenuView extends Observable implements View{
 		shell = new Shell(display);
 		
 		shell.setLayout(new GridLayout(7, false));
-		shell.setSize(500, 500);
+		shell.setSize(300, 150);
 		shell.setLocation(display.getClientArea().width/2-250,display.getClientArea().height/2-250);
-		shell.setMinimumSize(500,500);
+		shell.setMinimumSize(300, 150);
 		shell.setText("Choose Application");
 		
 		/*Image icon = null;
@@ -74,9 +74,8 @@ public class MenuView extends Observable implements View{
 	private void initNextButton() 
 	{
 		nextBtn = new Button(shell,SWT.PUSH);
-		//continueBtn.setEnabled(false);
 		nextBtn.setText("Continue");
-		nextBtn.setLayoutData(new GridData(SWT.LEFT,SWT.LEFT, false, false, 1,0));
+		nextBtn.setLayoutData(new GridData(SWT.LEFT,SWT.CENTER, true, true, 1,0));
 		nextBtn.addMouseListener(new MouseListener() 
 		{
 			String selectedApp;
@@ -87,7 +86,7 @@ public class MenuView extends Observable implements View{
 				switch(selectedApp)
 				{
 					case GeneralConsts.VIEW_2048_APP_NAME:
-						Presenter.present(new Model2048(4),new PreView2048());
+						Presenter.present(new _2048Model(4),new _2048PreView());
 						shell.dispose();
 						break;
 					case GeneralConsts.VIEW_MAZE_APP_NAME:
@@ -129,6 +128,7 @@ public class MenuView extends Observable implements View{
 	private void initDataSection() 
 	{
 		apps = new Combo(shell,SWT.READ_ONLY);
+		apps.setLayoutData(new GridData(SWT.RIGHT,SWT.CENTER, true, true, 1,0));
 		apps.add(GeneralConsts.VIEW_2048_APP_NAME);
 		apps.add(GeneralConsts.VIEW_MAZE_APP_NAME);
 	}
@@ -143,6 +143,19 @@ public class MenuView extends Observable implements View{
 	public void displayScore(String score) 
 	{
 		//DO NOTHING. GAME HASNT STARTED YET.
+	}
+
+	@Override
+	public void showWonGame() {
+		// TODO Auto-generated method stub
+		return;
+		
+	}
+
+	@Override
+	public void showLostGame() {
+		// TODO Auto-generated method stub
+		return;
 	}
 	
 }

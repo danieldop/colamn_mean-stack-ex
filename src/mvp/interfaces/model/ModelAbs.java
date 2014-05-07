@@ -9,6 +9,7 @@ public abstract class ModelAbs extends Observable implements Model
 	protected int[][] board;
 	protected int score = 0;
 	protected boolean isWin;
+	protected boolean isLost;
 	protected int modelCommand = -1;
 	protected int rows,cols;
 	
@@ -29,15 +30,9 @@ public abstract class ModelAbs extends Observable implements Model
 		return this.board;
 	}
 	
-	/**
-	 * 
-	 * @param rows
-	 * @param cols
-	 * @param level
-	 * Generating a random maze based on rows,cols and level.
-	 */
+
 	
-	protected void notifyPresenters(int command)
+	protected void execCommand(int command)
 	{
 		setModelCommand(command);
 		setChanged();
@@ -51,7 +46,6 @@ public abstract class ModelAbs extends Observable implements Model
 	
 	@Override
 	public int getModelCommand() {
-		// TODO Auto-generated method stub
 		return this.modelCommand;
 	}
 	

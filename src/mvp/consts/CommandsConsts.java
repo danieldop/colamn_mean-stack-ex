@@ -35,6 +35,8 @@ public class CommandsConsts {
 		
 		public static final int VIEW_TEC_BOARD_PREVIEW = 76;//maze
 		
+		public static final int VIEW_TEC_IS_LOST_GAME = 98;//SHARED maze,2048
+		public static final int VIEW_TEC_IS_WON_GAME = 99;//SHARED maze,2048
 		
 		public static final int VIEW_TEC_MAX_COMMAND = 100;//SHARED all<Presenter>
 		
@@ -42,6 +44,16 @@ public class CommandsConsts {
 		 * VIEW TECHNICAL COMMANDS - END
 		 */
 		
-		public static final int MODEL_SHOW_GENERATED_MAZE = 101;//maze
+		/*
+		 * MODEL SHOW COMMANDS - START
+		 */
+		public static final int MODEL_SHOW_GENERATED_MAZE = 101; //maze
+		public static final int MODEL_SHOW_WON_GAME = 102;//maze, 2048
+		public static final int MODEL_SHOW_LOST_GAME = 103; // 2048
+		
+		/*
+		 * MODEL SHOW COMMANDS - START
+		 */
+		
 		
 }

@@ -97,7 +97,6 @@ public class MazePreView extends Observable implements View
 	private void initContinueButton() 
 	{
 		continueBtn = new Button(shell,SWT.PUSH);
-		//continueBtn.setEnabled(false);
 		continueBtn.setText("Continue");
 		continueBtn.setLayoutData(new GridData(SWT.LEFT,SWT.LEFT, false, false, 4,0));
 		continueBtn.addMouseListener(new MouseListener() 
@@ -338,6 +337,16 @@ public class MazePreView extends Observable implements View
 				this.source = (Text)arg0.getSource();
 			}
 		};
+	}
+	@Override
+	public void showWonGame() {
+		// do nothing. game hasnt started yet.
+		
+	}
+	@Override
+	public void showLostGame() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

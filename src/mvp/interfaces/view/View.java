@@ -20,4 +20,7 @@ public interface View extends Runnable
 	 * if the data is held by a canvas, it should call redraw method.
 	 */
 	public void displayScore(final String score);
+	
+	public void showWonGame();
+	public void showLostGame();
 }

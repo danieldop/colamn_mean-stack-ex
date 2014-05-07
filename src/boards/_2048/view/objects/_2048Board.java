@@ -7,10 +7,10 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.widgets.Composite;
 
-public class Board2048 extends Board {
+public class _2048Board extends Board {
 	private final int padding = 5;
 
-	public Board2048(Composite parent, int style) {
+	public _2048Board(Composite parent, int style) {
 		super(parent, style);
 		this.setBackground(new Color(getDisplay(), 187, 173, 160));
 	}

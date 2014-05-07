@@ -421,6 +421,12 @@ public abstract class ViewAbs extends Observable implements View
 		protected abstract void initBoardMouseEvents();
 		protected abstract void initBoardKeyEvents();
 		protected abstract String getIconPath();
-		protected abstract void resetGameSettings(); 
+		protected abstract void resetGameSettings();
+		
+		protected void isGameEnded() 
+		{
+			execCommand(CommandsConsts.VIEW_TEC_IS_WON_GAME,false);
+			execCommand(CommandsConsts.VIEW_TEC_IS_LOST_GAME,false);
+		}
 		
 }
